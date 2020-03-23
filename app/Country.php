@@ -8,6 +8,8 @@ class Country extends Model
 {
     use HasReports;
 
+    protected $fillable = ['name'];
+
     public function provinces()
     {
         return $this->hasMany(Province::class);

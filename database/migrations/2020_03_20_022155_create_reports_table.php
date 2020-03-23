@@ -16,15 +16,14 @@ class CreateReportsTable extends Migration
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
             $table->date('date');
-            $table->unsignedInteger('confirmed');
-            $table->unsignedInteger('deaths');
-            $table->unsignedInteger('recovered');
+            $table->unsignedInteger('confirmed')->default(0);
+            $table->unsignedInteger('deaths')->default(0);
+            $table->unsignedInteger('recovered')->default(0);
             $table->foreignId('country_id')->constrained();
             $table
                 ->foreignId('province_id')
                 ->nullable()
                 ->constrained();
-            $table->timestamps();
         });
     }
 
