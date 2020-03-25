@@ -6,6 +6,7 @@ use App\Report;
 use App\Country;
 use App\Province;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use League\Csv\Reader;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
@@ -52,42 +53,51 @@ class ScrapeAndSeed extends Command
      */
     public function handle()
     {
-        Storage::deleteDirectory(self::DIRECTORY);
+        //Storage::deleteDirectory(self::DIRECTORY);
 
-        $path = storage_path('app/' . self::DIRECTORY);
+        //shell_exec("git clone https://github.com/CSSEGISandData/COVID-19.git {$this->repositoryPath()}");
 
-        shell_exec("git clone https://github.com/CSSEGISandData/COVID-19.git {$path}");
+        try {
+            DB::beginTransaction();
 
-        $this->call('migrate:fresh');
+            DB::table('reports')->delete();
+            DB::table('provinces')->delete();
+            DB::table('countries')->delete();
 
-        $this->dailyReports()->each(function ($path) {
-            $date = Str::replaceFirst('.csv', '', basename($path));
-            $this->line("Importing {$date}");
+            $this->dailyReports()->each(function ($path) {
+                $date = Str::replaceFirst('.csv', '', basename($path));
+                $this->line("Importing {$date}");
 
-            $csv = Reader::createFromString(Storage::get($path));
-            $csv->setHeaderOffset(0);
+                $csv = Reader::createFromString(Storage::get($path));
+                $csv->setHeaderOffset(0);
 
-            collect($csv->getRecords())->each(function ($report) use ($date) {
-                $this->findOrCreateModels($report, $date);
+                collect($csv->getRecords())->each(function ($report) use ($date) {
+                    $this->findOrCreateModels($report, $date);
+                });
             });
-        });
 
-        Storage::deleteDirectory(self::DIRECTORY);
+            DB::commit();
+        } catch (\Exception $e) {
+            dump($e->getMessage());
+            DB::rollBack();
+        }
+
+        //Storage::deleteDirectory(self::DIRECTORY);
     }
 
     /**
      * @param $report
      * @param string $date
      */
-    public function findOrCreateModels($report, string $date): void
+    public function findOrCreateModels(array $report, string $date): void
     {
         $country = Country::firstOrCreate([
-            'name' => $report['Country/Region'],
+            'name' => $this->getCountryName($report),
         ])->id;
 
-        $province = $report['Province/State']
+        $province = $this->getProvinceName($report)
             ? Province::firstOrCreate([
-                'name' => $report['Province/State'],
+                'name' => $this->getProvinceName($report),
                 'country_id' => $country,
             ])->id
             : null;
@@ -107,6 +117,34 @@ class ScrapeAndSeed extends Command
         Report::create(array_merge($reportIdentifiers, $reportMetrics));
     }
 
+    public function getProvinceName(array $report)
+    {
+        $keys = ['Province/State', 'Province_State'];
+
+        return $report[$this->determineNamingConvention($keys, $report)] ?? '';
+    }
+
+    public function getCountryName(array $report)
+    {
+        $keys = ['Country/Region', 'Country_Region'];
+
+        return $report[$this->determineNamingConvention($keys, $report)] ?? '';
+    }
+
+    /**
+     * @param array $possibilities
+     * @param array $report
+     * @return mixed
+     */
+    public function determineNamingConvention(array $possibilities, array $report)
+    {
+        return collect($possibilities)
+            ->filter(function ($convention) use ($report) {
+                return array_key_exists($convention, $report);
+            })
+            ->first();
+    }
+
     /**
      * @return \Illuminate\Support\Collection
      */
@@ -115,6 +153,15 @@ class ScrapeAndSeed extends Command
         return collect(Storage::files($this->dailyReportsPath()))->filter(function ($path) {
             return Str::contains($path, '.csv');
         });
+    }
+
+    /**
+     * Path to the locally cloned repository.
+     * @return string
+     */
+    public function repositoryPath()
+    {
+        return storage_path('app/' . self::DIRECTORY);
     }
 
     public function dailyReportsPath()
