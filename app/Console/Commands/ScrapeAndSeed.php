@@ -19,7 +19,7 @@ class ScrapeAndSeed extends Command
      *
      * @var string
      */
-    protected $signature = 'scrape:seed';
+    protected $signature = 'scrape:seed {--fresh}';
 
     /**
      * The console command description.
@@ -53,9 +53,13 @@ class ScrapeAndSeed extends Command
      */
     public function handle()
     {
-        //Storage::deleteDirectory(self::DIRECTORY);
-
-        //shell_exec("git clone https://github.com/CSSEGISandData/COVID-19.git {$this->repositoryPath()}");
+        if ($this->option('fresh') || !Storage::exists(self::DIRECTORY)) {
+            Storage::deleteDirectory(self::DIRECTORY);
+            shell_exec("git clone https://github.com/CSSEGISandData/COVID-19.git {$this->repositoryPath()}");
+        } else {
+            shell_exec("cd {$this->repositoryPath()}");
+            $this->line(shell_exec('git pull'));
+        }
 
         try {
             DB::beginTransaction();
@@ -82,7 +86,9 @@ class ScrapeAndSeed extends Command
             DB::rollBack();
         }
 
-        //Storage::deleteDirectory(self::DIRECTORY);
+        if ($this->option('fresh')) {
+            Storage::deleteDirectory(self::DIRECTORY);
+        }
     }
 
     /**
@@ -157,6 +163,7 @@ class ScrapeAndSeed extends Command
 
     /**
      * Path to the locally cloned repository.
+     *
      * @return string
      */
     public function repositoryPath()

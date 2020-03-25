@@ -1,7 +1,11 @@
 import { InertiaApp } from '@inertiajs/inertia-vue';
+import VueGoogleCharts from 'vue-google-charts';
 import Vue from 'vue';
 
+Vue.config.productionTip = false;
+
 Vue.use(InertiaApp);
+Vue.use(VueGoogleCharts);
 
 const app = document.getElementById('app');
 
