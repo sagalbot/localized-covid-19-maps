@@ -1,7 +1,8 @@
 <template>
   <div class="flex-1 flex flex-col">
     <header class="p-3 border-b border-gray-200">
-      <h1 class="text-red-500 text-xl font-bold leading-none">
+      <Icon name="menu" />
+      <h1 class="text-teal-400 text-xl font-bold leading-none">
         COVID-19 Tracker
       </h1>
     </header>
@@ -11,8 +12,10 @@
 </template>
 
 <script>
+import Icon from '../Components/Icon';
 export default {
   name: 'App',
+  components: { Icon },
   data: () => ({}),
   computed: {
     countries() {
