@@ -17,6 +17,7 @@ class CountryResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            //'cases' => $this->whenLoaded('latestReport', $this->whenLoaded('latestReport')->confirmed, 0),
         ];
     }
 }

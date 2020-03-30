@@ -1,0 +1,8 @@
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 200ms;
+}
+.slide-left-enter,
+.slide-left-leave-to {
+  transform: translateX(-100%);
+}

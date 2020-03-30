@@ -14,9 +14,4 @@ class Country extends Model
     {
         return $this->hasMany(Province::class);
     }
-
-    //public function reports()
-    //{
-    //    return $this->belongsToMany(Report::class);
-    //}
 }

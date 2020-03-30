@@ -8,7 +8,14 @@ class Report extends Model
 {
     public $timestamps = false;
 
+    public $dates = ['date'];
+
     protected $fillable = ['date', 'country_id', 'province_id', 'deaths', 'confirmed', 'recovered'];
+
+    public function getCreatedAtColumn()
+    {
+        return 'date';
+    }
 
     public function country()
     {

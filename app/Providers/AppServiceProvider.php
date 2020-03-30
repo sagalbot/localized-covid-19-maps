@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Country;
 use App\Http\Resources\ProvinceResource;
+use App\Province;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\CountryResource;
@@ -32,16 +35,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Inertia::share('countries', function () {
-            $countries = DB::table('countries')
-                ->select(['id', 'name'])
-                ->get();
+            $countries = Country::with('latestReport')->get();
             return CountryResource::collection($countries);
         });
 
         Inertia::share('provinces', function () {
-            $provinces = DB::table('provinces')
-                ->select(['id', 'name', 'country_id'])
-                ->get();
+            $provinces = Province::with('latestReport')->get();
             return ProvinceResource::collection($provinces);
         });
     }

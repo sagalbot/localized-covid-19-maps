@@ -97,6 +97,10 @@ class ScrapeAndSeed extends Command
      */
     public function findOrCreateModels(array $report, string $date): void
     {
+        if (in_array(['Death', 'Recovered', 'Confirmed'], $this->getProvinceName($report))) {
+            return;
+        }
+
         $country = Country::firstOrCreate([
             'name' => $this->getCountryName($report),
         ])->id;
