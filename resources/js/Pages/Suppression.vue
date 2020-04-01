@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Dashboard</h1>
+    <h1>Suppression</h1>
   </div>
 </template>
 
@@ -8,7 +8,7 @@
 import SidebarLayout from '../Layout/SidebarLayout';
 
 export default {
-  name: 'Dashboard',
+  name: 'Suppression',
   layout: SidebarLayout
 };
 </script>

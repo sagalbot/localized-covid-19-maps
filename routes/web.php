@@ -16,3 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return \Inertia\Inertia::render('Dashboard');
 });
+
+Route::get('/suppression', function () {
+    return Inertia\Inertia::render('Suppression');
+});

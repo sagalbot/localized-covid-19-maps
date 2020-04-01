@@ -9,6 +9,8 @@ Vue.use(InertiaApp);
 Vue.use(VueGoogleCharts);
 Vue.use(SvgVue);
 
+import './components/globalComponents';
+
 const app = document.getElementById('app');
 
 new Vue({
