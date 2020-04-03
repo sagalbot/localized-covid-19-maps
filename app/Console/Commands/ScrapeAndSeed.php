@@ -6,10 +6,12 @@ use App\Report;
 use App\Country;
 use App\Province;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use League\Csv\AbstractCsv;
 use League\Csv\Reader;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ScrapeAndSeed extends Command
@@ -36,7 +38,16 @@ class ScrapeAndSeed extends Command
     /**
      * The path to daily reports within the repository.
      */
+    const TIME_SERIES = 'csse_covid_19_data/csse_covid_19_time_series';
+
     const REPORTS_PATH = 'csse_covid_19_data/csse_covid_19_daily_reports';
+
+    const CONFIRMED = 'time_series_covid19_confirmed_global.csv';
+    const DEATHS = 'time_series_covid19_deaths_global.csv';
+    const RECOVERED = 'time_series_covid19_recovered_global.csv';
+
+    const US_CONFIRMED = 'time_series_covid19_confirmed_US.csv';
+    const US_DEATHS = 'time_series_covid19_deaths_US.csv';
 
     /**
      * Create a new command instance.
@@ -54,77 +65,78 @@ class ScrapeAndSeed extends Command
     public function handle()
     {
         if ($this->option('fresh') || !Storage::exists(self::DIRECTORY)) {
+            $this->info('Cloning fresh repository...');
             Storage::deleteDirectory(self::DIRECTORY);
             shell_exec("git clone https://github.com/CSSEGISandData/COVID-19.git {$this->repositoryPath()}");
         } else {
-            shell_exec("cd {$this->repositoryPath()}");
-            $this->line(shell_exec('git pull'));
+            $this->info('Pulling repository...');
+            $this->line(shell_exec("cd {$this->repositoryPath()} && git pull"));
         }
 
         try {
             DB::beginTransaction();
 
-            DB::table('reports')->delete();
-            DB::table('provinces')->delete();
-            DB::table('countries')->delete();
+            $this->resetDatabase();
 
-            $this->dailyReports()->each(function ($path) {
-                $date = Str::replaceFirst('.csv', '', basename($path));
-                $this->line("Importing {$date}");
+            Cache::flush();
 
-                $csv = Reader::createFromString(Storage::get($path));
-                $csv->setHeaderOffset(0);
+            collect([self::CONFIRMED, self::DEATHS, self::RECOVERED])->each(function ($file) {
+                $this->line("Importing {$file} \n");
+                $records = collect($this->getSeries($file)->getRecords());
 
-                collect($csv->getRecords())->each(function ($report) use ($date) {
-                    $this->findOrCreateModels($report, $date);
+                $bar = $this->output->createProgressBar($records->count());
+                $bar->start();
+
+                $records->each(function ($row) use ($bar, $file) {
+                    $this->findOrCreateModels($row, $file);
+                    $bar->advance();
                 });
+
+                $bar->finish();
             });
+
+            Cache::flush();
 
             DB::commit();
         } catch (\Exception $e) {
             dump($e->getMessage());
             DB::rollBack();
         }
-
-        if ($this->option('fresh')) {
-            Storage::deleteDirectory(self::DIRECTORY);
-        }
     }
 
     /**
-     * @param $report
-     * @param string $date
+     * @param array $row
+     * @param string $file
      */
-    public function findOrCreateModels(array $report, string $date): void
+    public function findOrCreateModels(array $row, string $file): void
     {
-        if (in_array(['Death', 'Recovered', 'Confirmed'], $this->getProvinceName($report))) {
-            return;
-        }
+        $metric = collect(['deaths', 'confirmed', 'recovered'])->first(function ($type) use ($file) {
+            return Str::contains($file, $type);
+        });
 
-        $country = Country::firstOrCreate([
-            'name' => $this->getCountryName($report),
-        ])->id;
+        $country = $this->determineCountryId($row);
+        $province = $this->determineProvinceId($row, $country);
 
-        $province = $this->getProvinceName($report)
-            ? Province::firstOrCreate([
-                'name' => $this->getProvinceName($report),
-                'country_id' => $country,
-            ])->id
-            : null;
+        collect($row)->each(function ($value, $date) use ($metric, $province, $country) {
+            if (sizeof(explode('/', $date)) === 3 && checkdate(...explode('/', $date))) {
+                $reportCacheKey = "{$date}-{$country}-{$province}";
 
-        $reportIdentifiers = [
-            'date' => Carbon::createFromFormat('m-d-Y', $date),
-            'country_id' => $country,
-            'province_id' => $province,
-        ];
+                if (Cache::get($reportCacheKey)) {
+                    $report = Cache::get($reportCacheKey);
+                } else {
+                    $report = Report::firstOrCreate([
+                        'date' => Carbon::createFromFormat('n/j/y', $date),
+                        'country_id' => $country,
+                        'province_id' => $province,
+                    ]);
+                    Cache::put($reportCacheKey, $report);
+                }
 
-        $reportMetrics = [
-            'deaths' => $report['Deaths'] ?: 0,
-            'confirmed' => $report['Confirmed'] ?: 0,
-            'recovered' => $report['Recovered'] ?: 0,
-        ];
-
-        Report::create(array_merge($reportIdentifiers, $reportMetrics));
+                $report->update([
+                    $metric => $value,
+                ]);
+            }
+        });
     }
 
     public function getProvinceName(array $report)
@@ -178,5 +190,78 @@ class ScrapeAndSeed extends Command
     public function dailyReportsPath()
     {
         return self::DIRECTORY . '/' . self::REPORTS_PATH;
+    }
+
+    /**
+     * @param $name
+     * @return \League\Csv\AbstractCsv
+     * @throws \League\Csv\Exception
+     */
+    public function getSeries($name): AbstractCsv
+    {
+        $file = Storage::get(self::DIRECTORY . '/' . self::TIME_SERIES . '/' . $name);
+
+        $csv = Reader::createFromString($file);
+        $csv->setHeaderOffset(0);
+
+        return $csv;
+    }
+
+    protected function resetDatabase(): void
+    {
+        DB::table('reports')->delete();
+        DB::table('provinces')->delete();
+        DB::table('countries')->delete();
+    }
+
+    /**
+     * @param array $row
+     * @return int
+     */
+    protected function determineCountryId(array $row): int
+    {
+        $name = $this->getCountryName($row);
+        $key = "Country-{$name}";
+
+        if (Cache::get($key)) {
+            return Cache::get($key);
+        }
+
+        $country = Country::firstOrCreate([
+            'name' => $name,
+        ])->id;
+
+        Cache::put($key, $country);
+
+        return $country;
+    }
+
+    /**
+     * @param array $row
+     * @param int $country
+     * @return int|null
+     */
+    protected function determineProvinceId(array $row, int $country)
+    {
+        $name = $this->getProvinceName($row);
+
+        if (!$name) {
+            return null;
+        }
+
+        $key = "Province-{$name}";
+
+        if (Cache::get($key)) {
+            return Cache::get($key);
+        }
+
+        $province = Province::firstOrCreate([
+            'name' => $name,
+            'country_id' => $country,
+        ])->id;
+
+        Cache::put($key, $province);
+
+        return $province;
     }
 }
