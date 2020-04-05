@@ -8,7 +8,7 @@
         v-for="{ label, route, icon } in links"
         :key="route.toString()"
         :class="{ active: routeActive(route.name) }"
-        :href="route.toString()"
+        :href="route.toString() + queryString"
         class="inline-flex justify-between"
       >
         <span v-if="!collapsed">{{ route.name }}</span>
@@ -19,9 +19,7 @@
 </template>
 
 <script>
-import RegionSelect from './RegionSelect';
-import state from '../../state';
-import { CALENDAR, LOCK_CLOSED } from '../Icons/icons';
+import { CALENDAR, GLOBE, LOCK_CLOSED } from '../Icons/icons';
 import Icon from '../Icons/Icon';
 
 export default {
@@ -33,11 +31,9 @@ export default {
     }
   },
   computed: {
-    showLinks() {
-      return !state.showRegions;
-    },
     links() {
       return [
+        { label: 'Regions', route: this.route('regions'), icon: GLOBE },
         { label: 'Timeline', route: this.route('timeline'), icon: CALENDAR },
         {
           label: 'Suppression',
@@ -45,6 +41,11 @@ export default {
           icon: LOCK_CLOSED
         }
       ];
+    },
+    queryString() {
+      return !!this.$page.selectedRegions.length
+        ? '?regions=' + btoa(JSON.stringify(this.$page.selectedRegions))
+        : '';
     }
   }
 };
