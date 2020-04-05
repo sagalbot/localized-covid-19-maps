@@ -76,9 +76,7 @@ class ScrapeAndSeed extends Command
         try {
             DB::beginTransaction();
 
-            //if ($this->option('fresh')) {
             $this->resetDatabase();
-            //}
 
             Cache::flush();
 
@@ -95,6 +93,7 @@ class ScrapeAndSeed extends Command
                 });
 
                 $bar->finish();
+                $this->line("\n");
             });
 
             Cache::flush();
@@ -217,8 +216,6 @@ class ScrapeAndSeed extends Command
     protected function resetDatabase(): void
     {
         DB::table('reports')->delete();
-        DB::table('provinces')->delete();
-        DB::table('countries')->delete();
     }
 
     /**

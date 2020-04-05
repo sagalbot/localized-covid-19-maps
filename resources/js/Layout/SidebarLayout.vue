@@ -12,12 +12,8 @@
       <div class="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3">
         <HamburgerButton @sidebar:open="sidebarOpen = true" />
       </div>
-      <main
-        class="flex-1 relative z-0 overflow-y-auto pt-2 pb-6 focus:outline-none md:py-6"
-      >
-        <!--        <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">-->
+      <main class="flex-1 relative z-0 overflow-y-auto pt-2 pb-6 md:py-6">
         <slot></slot>
-        <!--        </div>-->
       </main>
     </div>
   </div>

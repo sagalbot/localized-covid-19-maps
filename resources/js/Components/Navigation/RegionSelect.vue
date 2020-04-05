@@ -17,7 +17,7 @@
       </li>
       <li
         v-for="region in regions"
-        :key="region.id"
+        :key="region.type + region.id"
         class="py-1 my-1 border-b border-gray-200"
         :class="{ 'text-red-600 sticky': isSelected(region) }"
       >

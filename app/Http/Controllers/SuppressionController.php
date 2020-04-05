@@ -49,7 +49,7 @@ class SuppressionController extends Controller
         return $model
             ::with([
                 'reports' => function (HasMany $query) {
-                    $query->where('confirmed', '>=', 100);
+                    $query->where('confirmed', '>=', 100)->orderBy('date');
                 },
             ])
             ->whereIn('id', $ids)

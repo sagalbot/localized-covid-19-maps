@@ -1,6 +1,5 @@
 <template>
-  <!--  <SidebarLayout>-->
-  <div ref="container" class="w-full h-full">
+  <div class="w-full h-full flex flex-col items-center justify-center">
     <VueApexCharts
       type="line"
       :width="width"
@@ -8,12 +7,12 @@
       :options="options"
     />
   </div>
-  <!--  </SidebarLayout>-->
 </template>
 
 <script>
 import SidebarLayout from '../Layout/SidebarLayout';
 import VueApexCharts from 'vue-apexcharts';
+import { chartConfig } from '../utility/charts';
 
 export default {
   name: 'Timeline',
@@ -23,15 +22,16 @@ export default {
     width: 0
   }),
   mounted() {
-    this.width = this.$refs.container.getBoundingClientRect().width;
+    this.width = this.$el.getBoundingClientRect().width;
   },
   computed: {
     options() {
-      return {
+      return chartConfig({
+        width: this.width,
         xaxis: {
           type: 'datetime'
         }
-      };
+      });
     },
     series() {
       return this.$page.series.map(({ name, reports }) => ({
@@ -43,7 +43,6 @@ export default {
       }));
     }
   }
-  // layout: SidebarLayout
 };
 </script>
 
