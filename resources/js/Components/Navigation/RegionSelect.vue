@@ -77,6 +77,7 @@ export default {
       const url = `${origin}${pathname}?regions=${btoa(
         JSON.stringify(updated)
       )}`;
+
       this.$inertia.visit(url);
     },
     isSelected(region) {

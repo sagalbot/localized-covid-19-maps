@@ -3,6 +3,7 @@ import abbr from 'sugar/number/abbr';
 
 const chartConfig = (options = {}) => ({
   chart: {
+    redrawOnParentResize: false,
     fontFamily:
       'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
   },
@@ -15,22 +16,8 @@ const chartConfig = (options = {}) => ({
   },
   markers: {
     size: 2,
-    // colors: undefined,
-    // strokeColors: 'transparent',
     strokeWidth: 0,
-    // strokeOpacity: 0.9,
-    // strokeDashArray: 0,
-    // fillOpacity: 1,
-    // discrete: [],
-    // shape: "circle",
-    // radius: 2,
-    // offsetX: 0,
-    // offsetY: 0,
-    // onClick: undefined,
-    // onDblClick: undefined,
-    // showNullDataPoints: true,
     hover: {
-      // size: undefined,
       sizeOffset: 0
     }
   },

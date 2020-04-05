@@ -2,7 +2,6 @@ import { InertiaApp } from '@inertiajs/inertia-vue';
 import VueGoogleCharts from 'vue-google-charts';
 import SvgVue from 'svg-vue';
 import Vue from 'vue';
-import registerComponents from './components/globalComponents';
 import ZiggyMixin from './mixins/ZiggyMixin';
 
 Vue.config.productionTip = false;
@@ -12,7 +11,6 @@ Vue.use(VueGoogleCharts);
 Vue.use(SvgVue);
 
 ZiggyMixin();
-registerComponents(Vue);
 
 const app = document.getElementById('app');
 

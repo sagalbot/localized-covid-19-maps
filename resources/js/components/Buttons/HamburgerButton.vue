@@ -1,6 +1,6 @@
 <template>
   <button
-    @click.stop="$emit('sidebar:open')"
+    v-on="$listeners"
     class="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:bg-gray-200 transition ease-in-out duration-150"
   >
     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">

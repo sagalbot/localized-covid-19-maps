@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import { ICONS } from './icons';
+
 const sizes = [
   '.w-0',
   '.w-1',
@@ -29,7 +31,8 @@ export default {
   props: {
     name: {
       type: String,
-      required: true
+      required: true,
+      validate: icon => ICONS.includes(icon)
     },
     size: {
       type: [String, Number],

@@ -1,13 +1,16 @@
 <template>
-  <div class="w-full h-full flex flex-col items-center justify-center">
-    <VueApexCharts
-      type="line"
-      :width="width"
-      :series="series"
-      :options="options"
-      class="py-5 mb-5"
-    />
-    <h1 class="text-xl text-gray-700">Days Since 100th Case</h1>
+  <div class="w-full h-full flex flex-col">
+    <div class="w-full flex justify-center items-center flex-col pt-3 pr-5">
+      <div ref="chartContainer" class="w-full">
+        <VueApexCharts
+          type="line"
+          :width="width"
+          :series="series"
+          :options="options"
+        />
+      </div>
+    </div>
+    <h1 class="text-xl text-gray-700 pl-5">Days Since 100th Case</h1>
 
     <div class="grid grid-cols-4 gap-3 py-5">
       <div
@@ -37,18 +40,23 @@ export default {
   layout: SidebarLayout,
   components: { VueApexCharts },
   data: () => ({
-    width: 0
+    width: 0,
+    resizeObserver: {}
   }),
   mounted() {
-    this.width = this.$el.getBoundingClientRect().width;
+    this.onResize();
+    this.resizeObserver = new ResizeObserver(this.onResize);
+    this.resizeObserver.observe(this.$refs.chartContainer, {
+      box: 'border-box'
+    });
+  },
+  beforeDestroy() {
+    this.resizeObserver.unobserve(this.$refs.chartContainer);
   },
   computed: {
     chartColors,
     options() {
-      return chartConfig({
-        height: this.width,
-        colors: this.chartColors
-      });
+      return chartConfig();
     },
     hundredthCaseDays() {
       return this.$page.series
@@ -58,7 +66,6 @@ export default {
           date: new Date(reports[0].date),
           current: reports[reports.length - 1],
           duration: reports.length
-          // color: this.chartColors[index]
         }))
         .sort((a, b) => a.duration < b.duration);
     },
@@ -72,8 +79,20 @@ export default {
       }));
     }
   },
+  // watch: {
+  //   width(current, prev) {
+  //     if (prev !== 0) {
+  //       this.$forceUpdate();
+  //     }
+  //   }
+  // },
   methods: {
-    abbr
+    abbr,
+    onResize() {
+      window.requestAnimationFrame(() => {
+        this.width = this.$refs.chartContainer.getBoundingClientRect().width;
+      });
+    }
   }
 };
 </script>
