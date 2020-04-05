@@ -10,6 +10,7 @@
         :class="{ active: routeActive(route.name) }"
         :href="route.toString() + queryString"
         class="inline-flex justify-between"
+        ``
       >
         <span v-if="!collapsed">{{ route.name }}</span>
         <Icon :name="icon" :size="4" />
@@ -20,7 +21,7 @@
 
 <script>
 import { CALENDAR, GLOBE, LOCK_CLOSED } from '../Icons/icons';
-import Icon from '../Icons/Icon';
+import Icon from '../Icons/Icon.vue';
 
 export default {
   components: { Icon },
