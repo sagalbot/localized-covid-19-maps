@@ -37,15 +37,20 @@ class TimelineController extends Controller
 
     public function series(): Collection
     {
-        return $this->query(Country::class, 'countries')->concat($this->query(Province::class, 'provinces'));
+        return collect($this->request->query('regions', []))
+            ->groupBy('type')
+            ->map(function (Collection $ids, $model) {
+                return $this->query($model, $ids->pluck('id')->toArray());
+            })
+            ->flatten();
     }
 
-    public function query(string $model, string $param): Collection
+    public function query(string $model, array $ids): Collection
     {
         return $model
             ::with('reports')
             ->select('id', 'name')
-            ->whereIn('id', $this->request->input($param, []))
+            ->whereIn('id', $ids)
             ->get();
     }
 }

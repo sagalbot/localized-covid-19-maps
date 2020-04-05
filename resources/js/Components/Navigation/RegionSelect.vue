@@ -27,7 +27,12 @@
         :class="{ 'text-red-600': isSelected(region) }"
       >
         <label class="flex items-center items-start px-5">
-          <input type="checkbox" :checked="isSelected(region)" class="mr-1" />
+          <input
+            type="checkbox"
+            :checked="isSelected(region)"
+            @input="updateSelected(region, $event)"
+            class="mr-1"
+          />
           {{ region.name }}
         </label>
       </li>
@@ -62,11 +67,26 @@ export default {
     }
   },
   methods: {
-    //
-    isSelected({ type, id }) {
-      return (
-        this.$page.selectedRegions.filter(selected => selected.id === id)
-          .length !== 0
+    updateSelected(region, { target }) {
+      let updated = this.selected;
+
+      if (target.checked) {
+        updated.push(region);
+      } else {
+        updated = updated.filter(
+          selected => JSON.stringify(region) !== JSON.stringify(selected)
+        );
+      }
+
+      let { origin, pathname } = window.location;
+      const url = `${origin}${pathname}?regions=${btoa(
+        JSON.stringify(updated)
+      )}`;
+      this.$inertia.visit(url);
+    },
+    isSelected(region) {
+      return this.$page.selectedRegions.find(
+        ({ type, id }) => region.type === type && region.id === id
       );
     }
   }

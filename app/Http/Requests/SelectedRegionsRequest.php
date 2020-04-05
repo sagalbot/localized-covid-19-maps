@@ -24,6 +24,7 @@ class SelectedRegionsRequest extends FormRequest
     public function rules()
     {
         return [
+            'regions' => 'array',
             'provinces' => 'array',
             'countries' => 'array',
             'provinces.*.id' => 'exists:provinces',

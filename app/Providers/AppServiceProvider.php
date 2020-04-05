@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Country;
+use App\Http\Requests\SelectedRegionsRequest;
 use App\Province;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use App\Http\Resources\RegionResource;
 use Illuminate\Support\ServiceProvider;
@@ -45,10 +47,14 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Inertia::share('selectedRegions', function () {
-            $provinces = Province::whereIn('id', request()->input('provinces', []))->get();
-            $countries = Country::whereIn('id', request()->input('countries', []))->get();
+            $selected = collect(request()->query('regions', []))
+                ->groupBy('type')
+                ->map(function (Collection $ids, $model) {
+                    return $model::whereIn('id', $ids->pluck('id')->toArray())->get();
+                })
+                ->flatten();
 
-            return RegionResource::collection($provinces->concat($countries));
+            return RegionResource::collection($selected);
         });
     }
 }

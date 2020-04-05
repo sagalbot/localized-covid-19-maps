@@ -11,7 +11,7 @@ class DecodeArrays extends TransformsRequest
      *
      * @var array
      */
-    protected $include = ['provinces', 'countries'];
+    protected $include = ['regions'];
 
     /**
      * Transform the given value.
