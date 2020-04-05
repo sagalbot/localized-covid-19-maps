@@ -24,6 +24,6 @@ class Report extends Model
 
     public function province()
     {
-        return $this->belongsTo(Report::class);
+        return $this->belongsTo(Province::class);
     }
 }

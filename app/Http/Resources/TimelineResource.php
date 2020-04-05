@@ -4,17 +4,12 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CountryResource extends JsonResource
+class TimelineResource extends JsonResource
 {
-    /**
-     * @var \App\Country
-     */
-    public $resource;
-
     /**
      * Transform the resource into an array.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function toArray($request)
@@ -22,6 +17,7 @@ class CountryResource extends JsonResource
         $toArray = [
             'id' => $this->id,
             'name' => $this->name,
+            'type' => get_class($this->resource),
         ];
 
         if ($reports = $this->whenLoaded('reports')) {

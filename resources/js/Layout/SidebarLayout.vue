@@ -15,12 +15,9 @@
       <main
         class="flex-1 relative z-0 overflow-y-auto pt-2 pb-6 focus:outline-none md:py-6"
       >
-        <div class="w-full">
-          {{ this.$page.title }}
-        </div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <slot></slot>
-        </div>
+        <!--        <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">-->
+        <slot></slot>
+        <!--        </div>-->
       </main>
     </div>
   </div>
@@ -36,19 +33,6 @@ export default {
   components: { HamburgerButton, MobileSidebar, DesktopSidebar },
   data: () => ({
     sidebarOpen: false
-  }),
-  mounted() {
-    // window.addEventListener("resize", () =>
-    //   requestAnimationFrame(() => {
-    //     console.log("paint!");
-    //   })
-    // );
-  },
-  methods: {
-    onClose() {
-      this.sidebarOpen = false;
-      debugger;
-    }
-  }
+  })
 };
 </script>

@@ -23,6 +23,7 @@ const sizes = [
   '.w-56',
   '.w-64'
 ];
+
 export default {
   name: 'Icon',
   props: {

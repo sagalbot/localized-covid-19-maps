@@ -8,11 +8,11 @@
 </template>
 
 <script>
-import PrimaryNavigation from "../Navigation/PrimaryNavigation";
-import FooterNavigation from "../Navigation/FooterNavigation";
+import PrimaryNavigation from '../Navigation/PrimaryNavigation';
+import FooterNavigation from '../Navigation/FooterNavigation';
 
 export default {
-  name: "DesktopSidebar",
+  name: 'DesktopSidebar',
   components: { FooterNavigation, PrimaryNavigation }
 };
 </script>

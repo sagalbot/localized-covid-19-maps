@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ProvinceResource extends JsonResource
+class RegionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,16 +14,10 @@ class ProvinceResource extends JsonResource
      */
     public function toArray($request)
     {
-        $toArray = [
+        return [
             'id' => $this->id,
             'name' => $this->name,
-            'country_id' => $this->country_id,
+            'type' => get_class($this->resource),
         ];
-
-        if ($reports = $this->whenLoaded('reports')) {
-            $toArray['reports'] = ReportResource::collection($this->resource->timeSeries());
-        }
-
-        return $toArray;
     }
 }

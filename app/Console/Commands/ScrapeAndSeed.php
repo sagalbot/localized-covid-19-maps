@@ -21,7 +21,7 @@ class ScrapeAndSeed extends Command
      *
      * @var string
      */
-    protected $signature = 'scrape:seed {--fresh}';
+    protected $signature = 'scrape {--fresh}';
 
     /**
      * The console command description.
@@ -76,7 +76,9 @@ class ScrapeAndSeed extends Command
         try {
             DB::beginTransaction();
 
+            //if ($this->option('fresh')) {
             $this->resetDatabase();
+            //}
 
             Cache::flush();
 
@@ -118,7 +120,7 @@ class ScrapeAndSeed extends Command
         $province = $this->determineProvinceId($row, $country);
 
         collect($row)->each(function ($value, $date) use ($metric, $province, $country) {
-            if (sizeof(explode('/', $date)) === 3 && checkdate(...explode('/', $date))) {
+            if ($this->isDateColumn($date)) {
                 $reportCacheKey = "{$date}-{$country}-{$province}";
 
                 if (Cache::get($reportCacheKey)) {
@@ -137,6 +139,11 @@ class ScrapeAndSeed extends Command
                 ]);
             }
         });
+    }
+
+    public function isDateColumn(string $date): bool
+    {
+        return sizeof(explode('/', $date)) === 3 && checkdate(...explode('/', $date));
     }
 
     public function getProvinceName(array $report)

@@ -1,7 +1,9 @@
 <template>
-  <div>
+  <SidebarLayout>
     <h1>Suppression</h1>
-  </div>
+
+    <p>heres a bunch of stuff about it</p>
+  </SidebarLayout>
 </template>
 
 <script>
@@ -9,7 +11,8 @@ import SidebarLayout from '../Layout/SidebarLayout';
 
 export default {
   name: 'Suppression',
-  layout: SidebarLayout
+  components: { SidebarLayout }
+  // layout: SidebarLayout
 };
 </script>
 

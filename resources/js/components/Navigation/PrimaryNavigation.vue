@@ -1,32 +1,61 @@
 <template>
-  <div class="h-0 flex-1 flex flex-col pb-4 overflow-y-auto">
-    <div
-      class="flex-shrink-0 flex items-center px-4 py-3 border-b border-gray-200"
-    >
-      <h1>COVID-19 Dashboard</h1>
-    </div>
-    <nav class="mt-3 px-2">
-      <inertia-link href="/" @click="$emit('sidebar:close')">
-        Timeline
-      </inertia-link>
-      <inertia-link href="/suppression" @click="$emit('sidebar:close')">
-        Suppression
+  <div class="h-0 flex-1 flex flex-col overflow-y-auto text-gray-700">
+    <nav>
+      <h4 class="border-b border-gray-200 px-5 py-2 mb-2">
+        Reports
+      </h4>
+      <inertia-link
+        v-for="{ label, route } in links"
+        :key="route.toString()"
+        :class="{ active: routeActive(route.name) }"
+        :href="route.toString()"
+      >
+        {{ route.name }}
       </inertia-link>
     </nav>
+    <RegionSelect class="flex-grow" />
   </div>
 </template>
 
+<script>
+import RegionSelect from './RegionSelect';
+import state from '../../state';
+
+export default {
+  components: { RegionSelect },
+  computed: {
+    showLinks() {
+      return !state.showRegions;
+    },
+    links() {
+      return [
+        { label: 'Timeline', route: this.route('timeline') },
+        { label: 'Suppression', route: this.route('suppression') }
+      ];
+    }
+  },
+  methods: {
+    // @click.prevent="onClick(route)"
+    async onClick(route) {
+      this.$emit('sidebar:close');
+      await this.$inertia.visit(route.toString());
+      this.$forceUpdate();
+    }
+  }
+};
+</script>
+
 <style scoped>
 a {
-  @apply flex w-full items-center px-2 py-2 text-base leading-6 font-medium rounded-md transition ease-in-out duration-150;
+  @apply flex w-full items-center px-4 py-2 mb-2 text-base text-gray-700 leading-6 font-medium rounded-md transition ease-in-out duration-150;
 }
 .active {
-  @apply my-1 text-gray-900 bg-gray-100;
-}
-a:hover {
-  @apply bg-gray-300 text-gray-700;
+  @apply text-blue-700 bg-gray-100;
 }
 .active:focus {
-  @apply outline-none text-gray-900 bg-gray-100;
+  @apply outline-none;
+}
+a:hover {
+  @apply bg-gray-100 text-gray-700;
 }
 </style>
