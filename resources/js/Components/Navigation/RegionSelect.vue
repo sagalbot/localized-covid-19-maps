@@ -6,14 +6,10 @@
           class="flex items-center justify-between border-b border-t border-gray-200 px-5 py-2"
         >
           Selected Regions
-          <button class="hover:text-blue-500" @click="showAll = !showAll">
-            toggle all
-          </button>
         </header>
 
         <input
           type="search"
-          v-if="showAll"
           v-model="query"
           placeholder="filter this list..."
           class="border-b border-gray-200 w-full px-5 py-2"
@@ -21,10 +17,9 @@
       </li>
       <li
         v-for="region in regions"
-        v-if="showAll || isSelected(region)"
         :key="region.id"
         class="py-1 my-1 border-b border-gray-200"
-        :class="{ 'text-red-600': isSelected(region) }"
+        :class="{ 'text-red-600 sticky': isSelected(region) }"
       >
         <label class="flex items-center items-start px-5">
           <input

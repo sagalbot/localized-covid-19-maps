@@ -1,14 +1,14 @@
 <template>
-  <SidebarLayout>
-    <div ref="container" class="w-full h-full">
-      <VueApexCharts
-        type="line"
-        :width="width"
-        :series="series"
-        :options="options"
-      />
-    </div>
-  </SidebarLayout>
+  <!--  <SidebarLayout>-->
+  <div ref="container" class="w-full h-full">
+    <VueApexCharts
+      type="line"
+      :width="width"
+      :series="series"
+      :options="options"
+    />
+  </div>
+  <!--  </SidebarLayout>-->
 </template>
 
 <script>
@@ -16,7 +16,8 @@ import SidebarLayout from '../Layout/SidebarLayout';
 import VueApexCharts from 'vue-apexcharts';
 
 export default {
-  name: 'Dashboard',
+  name: 'Timeline',
+  layout: SidebarLayout,
   components: { SidebarLayout, VueApexCharts },
   data: () => ({
     width: 0
