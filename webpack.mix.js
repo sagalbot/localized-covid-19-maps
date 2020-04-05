@@ -1,18 +1,31 @@
 const mix = require('laravel-mix');
 
-/*
- |--------------------------------------------------------------------------
- | Mix Asset Management
- |--------------------------------------------------------------------------
- |
- | Mix provides a clean, fluent API for defining some Webpack build steps
- | for your Laravel application. By default, we are compiling the Sass
- | file for the application as well as bundling up all the JS files.
- |
- */
+const purgecss = require('@fullhuman/postcss-purgecss')({
+  content: [
+    './resources/**/*.blade.php',
+    './resources/**/*.vue',
+    './node_modules/vue-select/src/**/*.vue'
+  ],
+  defaultExtractor: content => content.match(/[\w-/:]+(?<!:)/g) || []
+});
+
+require('laravel-mix-svg-vue');
 
 mix.js('resources/js/app.js', 'public/js');
 
 mix.postCss('resources/css/app.css', 'public/css', [
   require('tailwindcss'),
+  require('autoprefixer'),
+  ...(process.env.NODE_ENV === 'production' ? [purgecss] : [])
 ]);
+
+mix.webpackConfig(webpack => ({
+  resolve: {
+    alias: {
+      '@': path.resolve('resources/js'),
+      ziggy: path.resolve('vendor/tightenco/ziggy/dist/js/route.js')
+    }
+  }
+}));
+
+mix.svgVue();
