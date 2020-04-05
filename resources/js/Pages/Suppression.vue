@@ -1,15 +1,6 @@
 <template>
   <div class="w-full h-full flex flex-col">
-    <div class="w-full flex justify-center items-center flex-col pt-3 pr-5">
-      <div ref="chartContainer" class="w-full">
-        <VueApexCharts
-          type="line"
-          :width="width"
-          :series="series"
-          :options="options"
-        />
-      </div>
-    </div>
+    <LineChart :series="series" />
     <h1 class="text-xl text-gray-700 pl-5">Days Since 100th Case</h1>
 
     <div class="grid grid-cols-4 gap-3 py-5">
@@ -29,35 +20,15 @@
 </template>
 
 <script>
-import VueApexCharts from 'vue-apexcharts';
-import abbr from 'sugar/number/abbr';
 import SidebarLayout from '../Layout/SidebarLayout';
-import { chartConfig } from '../utility/charts';
-import { chartColors } from '../utility/colors';
+import LineChart from './LineChart';
+import abbr from 'sugar/number/abbr';
 
 export default {
   name: 'Suppression',
   layout: SidebarLayout,
-  components: { VueApexCharts },
-  data: () => ({
-    width: 0,
-    resizeObserver: {}
-  }),
-  mounted() {
-    this.onResize();
-    this.resizeObserver = new ResizeObserver(this.onResize);
-    this.resizeObserver.observe(this.$refs.chartContainer, {
-      box: 'border-box'
-    });
-  },
-  beforeDestroy() {
-    this.resizeObserver.unobserve(this.$refs.chartContainer);
-  },
+  components: { LineChart },
   computed: {
-    chartColors,
-    options() {
-      return chartConfig();
-    },
     hundredthCaseDays() {
       return this.$page.series
         .filter(({ reports }) => reports.length)
@@ -79,22 +50,8 @@ export default {
       }));
     }
   },
-  // watch: {
-  //   width(current, prev) {
-  //     if (prev !== 0) {
-  //       this.$forceUpdate();
-  //     }
-  //   }
-  // },
   methods: {
-    abbr,
-    onResize() {
-      window.requestAnimationFrame(() => {
-        this.width = this.$refs.chartContainer.getBoundingClientRect().width;
-      });
-    }
+    abbr
   }
 };
 </script>
-
-<style scoped></style>

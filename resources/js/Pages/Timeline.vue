@@ -1,33 +1,21 @@
 <template>
   <div class="w-full h-full flex flex-col items-center justify-center">
-    <VueApexCharts
-      type="line"
-      :width="width"
-      :series="series"
-      :options="options"
-    />
+    <LineChart :options="options" :series="series" />
   </div>
 </template>
 
 <script>
 import SidebarLayout from '../Layout/SidebarLayout';
-import VueApexCharts from 'vue-apexcharts';
 import { chartConfig } from '../utility/charts';
+import LineChart from './LineChart';
 
 export default {
   name: 'Timeline',
   layout: SidebarLayout,
-  components: { SidebarLayout, VueApexCharts },
-  data: () => ({
-    width: 0
-  }),
-  mounted() {
-    this.width = this.$el.getBoundingClientRect().width;
-  },
+  components: { SidebarLayout, LineChart },
   computed: {
     options() {
       return chartConfig({
-        width: this.width,
         xaxis: {
           type: 'datetime'
         }
