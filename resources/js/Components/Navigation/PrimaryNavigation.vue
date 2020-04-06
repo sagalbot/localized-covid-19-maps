@@ -1,16 +1,34 @@
 <template>
   <div class="h-0 flex-1 flex flex-col overflow-y-auto text-gray-700">
     <nav>
-      <h4 v-if="!collapsed" class="border-b border-gray-200 px-5 py-2 mb-2">
+      <h4
+        v-if="!collapsed"
+        class="mt-10 border-b border-t border-gray-200 px-5 py-2 mb-2"
+      >
+        Regions
+      </h4>
+      <inertia-link
+        :key="regions.route.toString()"
+        :class="{ active: routeActive(regions.route.name) }"
+        :href="regions.route.toString() + queryString"
+        class="inline-flex justify-between"
+      >
+        <span v-if="!collapsed">{{ regions.route.name }}</span>
+        <Icon :name="regions.icon" :size="4" />
+      </inertia-link>
+
+      <h4
+        v-if="!collapsed"
+        class="mt-10 border-b border-t border-gray-200 px-5 py-2 mb-2"
+      >
         Reports
       </h4>
       <inertia-link
-        v-for="{ label, route, icon } in links"
+        v-for="{ route, icon } in reports"
         :key="route.toString()"
         :class="{ active: routeActive(route.name) }"
         :href="route.toString() + queryString"
         class="inline-flex justify-between"
-        ``
       >
         <span v-if="!collapsed">{{ route.name }}</span>
         <Icon :name="icon" :size="4" />
@@ -32,16 +50,14 @@ export default {
     }
   },
   computed: {
-    links() {
+    reports() {
       return [
-        { label: 'Regions', route: this.route('regions'), icon: GLOBE },
-        { label: 'Timeline', route: this.route('timeline'), icon: CALENDAR },
-        {
-          label: 'Suppression',
-          route: this.route('suppression'),
-          icon: LOCK_CLOSED
-        }
+        { route: this.route('timeline'), icon: CALENDAR },
+        { route: this.route('suppression'), icon: LOCK_CLOSED }
       ];
+    },
+    regions() {
+      return { route: this.route('regions'), icon: GLOBE };
     },
     queryString() {
       return !!this.$page.selectedRegions.length
@@ -54,15 +70,13 @@ export default {
 
 <style scoped>
 a {
-  @apply flex w-full items-center px-4 py-2 mb-2 text-base text-gray-700 leading-6 font-medium rounded-md transition ease-in-out duration-150;
+  @apply flex w-full items-center px-4 py-2 mb-2 text-base text-gray-700 leading-6 rounded-md transition ease-in-out duration-150;
 }
-.active {
-  @apply text-blue-700 bg-gray-100;
+.active,
+a:hover {
+  @apply text-blue-700 bg-blue-100;
 }
 .active:focus {
   @apply outline-none;
-}
-a:hover {
-  @apply bg-gray-100 text-gray-700;
 }
 </style>

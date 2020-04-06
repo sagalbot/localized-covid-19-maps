@@ -77,7 +77,7 @@
 import axios from "axios";
 import { intersection } from "lodash-es";
 import state from "./state";
-import Loading from "./components/Icons/Loading";
+import Loading from "./Components/Icons/Loading";
 
 export default {
   name: "App",

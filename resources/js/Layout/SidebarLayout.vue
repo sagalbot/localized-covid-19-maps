@@ -20,13 +20,19 @@
 </template>
 
 <script>
-import DesktopSidebar from '../components/Sidebar/DesktopSidebar';
-import MobileSidebar from '../components/Sidebar/MobileSidebar';
-import HamburgerButton from '../components/Buttons/HamburgerButton';
+import DesktopSidebar from '../Components/Sidebar/DesktopSidebar';
+import MobileSidebar from '../Components/Sidebar/MobileSidebar';
+import HamburgerButton from '../Components/Buttons/HamburgerButton';
+import PrimaryNavigation from '../Components/Navigation/PrimaryNavigation';
 
 export default {
   name: 'SidebarLayout',
-  components: { HamburgerButton, MobileSidebar, DesktopSidebar },
+  components: {
+    HamburgerButton,
+    MobileSidebar,
+    DesktopSidebar,
+    PrimaryNavigation
+  },
   data: () => ({
     sidebarOpen: false
   })
