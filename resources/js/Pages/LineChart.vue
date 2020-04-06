@@ -1,8 +1,6 @@
 <template>
-  <div
-    class="w-full flex justify-center items-center flex-col pt-3 pr-5 chart-container"
-  >
-    <div ref="chartContainer" class="w-full h-full">
+  <div class="w-full flex flex-col pt-3 pr-5 chart-container">
+    <div ref="chartContainer" class="w-full flex-1">
       <VueApexCharts
         type="line"
         height="100%"

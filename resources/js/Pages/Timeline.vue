@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-full flex flex-col items-center justify-center">
+  <div class="w-full h-full flex flex-col">
     <LineChart :options="options" :series="series" />
   </div>
 </template>
