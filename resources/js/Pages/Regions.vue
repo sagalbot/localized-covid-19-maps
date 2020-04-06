@@ -59,6 +59,12 @@
               class="mr-3"
             />
             {{ region.name }}
+            <span
+              v-if="region.country_name !== region.name"
+              class="text-gray-500"
+            >
+              , {{ region.country_name }}
+            </span>
           </label>
         </td>
         <td class="text-yellow-600 text-right px-4">
@@ -110,10 +116,11 @@ export default {
   },
   computed: {
     filtered() {
-      return this.regions.filter(({ name, id, type }) => {
-        const includesQuery = name
-          .toLowerCase()
-          .includes(this.query.toLowerCase());
+      return this.regions.filter(({ name, country_name, id, type }) => {
+        const query = this.query.toLowerCase();
+        const includesQuery =
+          name.toLowerCase().includes(query) ||
+          country_name.toLowerCase().includes(query);
 
         if (this.hideUnselected) {
           return this.isSelected({ id, type }) && includesQuery;
@@ -130,7 +137,7 @@ export default {
       }
 
       this.selected = this.selected.filter(
-        selected => JSON.stringify(selected) !== JSON.stringify({ type, id })
+        selected => selected.type !== type && selected.id !== id
       );
     },
     isSelected(region) {

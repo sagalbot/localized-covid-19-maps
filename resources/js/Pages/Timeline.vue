@@ -1,6 +1,14 @@
 <template>
-  <div class="w-full h-full flex flex-col">
-    <LineChart :options="options" :series="series" />
+  <div
+    class="w-full h-full flex flex-col"
+    :class="{ 'items-center justify-center': !hasRegions }"
+  >
+    <LineChart v-if="hasRegions" :options="options" :series="series" />
+    <h4 v-else class="text-gray-600">
+      Select some
+      <inertia-link class="text-blue-600" href="/regions">regions</inertia-link>
+      first to view a timeline chart.
+    </h4>
   </div>
 </template>
 
@@ -20,6 +28,9 @@ export default {
           type: 'datetime'
         }
       });
+    },
+    hasRegions() {
+      return Boolean(this.$page.selectedRegions.length);
     },
     series() {
       return this.$page.series.map(({ name, reports }) => ({

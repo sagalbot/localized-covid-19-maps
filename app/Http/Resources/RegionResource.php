@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Province;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class RegionResource extends JsonResource
@@ -14,11 +15,17 @@ class RegionResource extends JsonResource
      */
     public function toArray($request)
     {
+        if (get_class($this->resource) === Province::class) {
+            $countryName = $this->resource->country->name;
+        } else {
+            $countryName = $this->resource->name;
+        }
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'type' => get_class($this->resource),
-            'country_id' => $this->country_id ?: $this->id,
+            'country_name' => $countryName,
             'latest' => $this->latestReport->toArray(),
         ];
     }
