@@ -20,6 +20,10 @@
 }
 
 .chart-container {
-    min-height: 65%;
-    max-height: 75vh;
+  min-height: 65%;
+  max-height: 75vh;
+}
+
+a:focus {
+  outline: none;
 }

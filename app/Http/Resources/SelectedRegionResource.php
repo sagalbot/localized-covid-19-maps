@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class RegionResource extends JsonResource
+class SelectedRegionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,10 +16,7 @@ class RegionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
             'type' => get_class($this->resource),
-            'country_id' => $this->country_id ?: $this->id,
-            'latest' => $this->latestReport->toArray(),
         ];
     }
 }

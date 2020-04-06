@@ -13,12 +13,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::redirect('/', '/timeline');
+Route::redirect('/', '/regions');
 
 Route::get('/timeline', 'TimelineController')->name('timeline');
 
 Route::get('/suppression', 'SuppressionController')->name('suppression');
 
-Route::get('/regions', function () {
-    return \Inertia\Inertia::render('Regions');
-})->name('regions');
+Route::get('/regions', 'RegionController')->name('regions');

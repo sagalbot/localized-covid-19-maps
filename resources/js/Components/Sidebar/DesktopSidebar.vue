@@ -2,7 +2,7 @@
   <div class="hidden md:flex md:flex-shrink-0">
     <div
       class="flex flex-col border-r border-gray-200 bg-white"
-      :class="{ 'w-64': !collapsed }"
+      :class="{ 'w-64': !collapsed, 'w-12': collapsed }"
     >
       <HamburgerButton @click="collapsed = !collapsed" />
       <PrimaryNavigation :collapsed="collapsed" />

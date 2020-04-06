@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -16,5 +17,10 @@ class Country extends Model
     public function provinces(): HasMany
     {
         return $this->hasMany(Province::class);
+    }
+
+    public function provincesWithLatestReport(): HasMany
+    {
+        return $this->provinces()->with('latestReport');
     }
 }

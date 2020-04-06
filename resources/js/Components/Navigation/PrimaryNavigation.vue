@@ -13,7 +13,7 @@
         :class="{
           'bg-blue-100 hover:text-blue-700': routeActive(regions.route.name)
         }"
-        class="flex w-full inline-flex justify-between items-center px-4 py-2 mb-2 text-base text-gray-700 leading-6 rounded-md transition ease-in-out duration-150 hover:bg-blue-100 hover:text-blue-700"
+        class="flex w-full inline-flex justify-between items-center px-4 py-2 mb-2 text-base text-gray-700 leading-6 transition ease-in-out duration-150 hover:bg-blue-100 hover:text-blue-700"
       >
         <span v-if="!collapsed">{{ regions.route.name }}</span>
         <Icon :name="regions.icon" :size="4" />
@@ -30,7 +30,7 @@
         :key="route.toString()"
         :href="route.toString() + queryString"
         :class="{ 'bg-blue-100 text-blue-700': routeActive(route.name) }"
-        class="flex w-full inline-flex justify-between items-center px-4 py-2 mb-2 text-base text-gray-700 leading-6 rounded-md transition ease-in-out duration-150 hover:bg-blue-100 hover:text-blue-700"
+        class="flex w-full inline-flex justify-between items-center px-4 py-2 mb-2 text-base text-gray-700 leading-6 transition ease-in-out duration-150 hover:bg-blue-100 hover:text-blue-700"
       >
         <span v-if="!collapsed">{{ route.name }}</span>
         <Icon :name="icon" :size="4" />

@@ -17,7 +17,7 @@ trait HasReports
 
     public function latestReport(): HasOne
     {
-        return $this->hasOne(Report::class)->take(1);
+        return $this->hasOne(Report::class)->orderBy('date', 'desc');
     }
 
     public function timeSeries(): Collection

@@ -1,87 +1,140 @@
 <template>
-  <ul class="overflow-y-scroll h-full w-full relative text-gray-700">
-    <li class="sticky top-0 bg-white">
-      <header
-        class="flex items-center justify-between border-b border-gray-200 px-5 py-2"
+  <table class="table-auto overflow-y-scroll w-full relative text-gray-700">
+    <thead class="sticky top-0 bg-white">
+      <tr class="border-b border-gray-200">
+        <th colspan="4" class="border-b border-gray-200 py-2 px-3">
+          <div class="flex w-full justify-between">
+            <input
+              type="search"
+              v-model="query"
+              placeholder="filter this list..."
+              class="border border-gray-300 rounded px-2 py-1 flex-1 mr-3"
+            />
+            <label
+              class="inline-flex items-center border border-gray-300 rounded px-2 py-1 mr-3 font-normal hover:border-blue-500 hover:text-blue-500 transition transition-colors duration-200"
+              :class="{ 'border-blue-500 text-blue-500': hideUnselected }"
+            >
+              <input type="checkbox" v-model="hideUnselected" class="mr-2" />
+              hide unselected
+            </label>
+            <button
+              @click="selected = []"
+              :disabled="selected.length === 0"
+              class="inline-flex items-center border border-gray-300 rounded px-2 py-1 hover:border-yellow-700 hover:text-yellow-700 transition transition-colors duration-200"
+            >
+              clear selected
+              <Icon name="close-outline" :size="4" class="ml-2" />
+            </button>
+          </div>
+        </th>
+      </tr>
+      <tr>
+        <th class="border-b border-gray-300 text-gray-500 text-left px-4 py-2">
+          Region
+        </th>
+        <th class="border-b border-gray-300 text-gray-500 text-right px-4 py-2">
+          Confirmed
+        </th>
+        <th class="border-b border-gray-300 text-gray-500 text-right px-4 py-2">
+          Recovered
+        </th>
+        <th class="border-b border-gray-300 text-gray-500 text-right px-4 py-2">
+          Deaths
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        v-for="region in filtered"
+        :key="region.type + region.id"
+        class="px-2 my-1 border-b border-gray-200"
+        :class="{ 'text-blue-500': isSelected(region) }"
       >
-        Selected Regions
-      </header>
-
-      <input
-        type="search"
-        v-model="query"
-        placeholder="filter this list..."
-        class="border-b border-gray-200 w-full px-5 py-2"
-      />
-    </li>
-    <li
-      v-for="region in regions"
-      :key="region.type + region.id"
-      class="py-1 my-1 border-b border-gray-200"
-      :class="{ 'text-red-600': isSelected(region) }"
-    >
-      <label class="flex items-center items-start px-5">
-        <input
-          type="checkbox"
-          :checked="isSelected(region)"
-          @input="updateSelected(region, $event)"
-          class="mr-1"
-        />
-        {{ region.name }}
-      </label>
-    </li>
-  </ul>
+        <td class="text-left px-4">
+          <label class="flex flex-1 py-2 items-center items-start">
+            <input
+              type="checkbox"
+              :checked="isSelected(region)"
+              @input="updateSelected(region, $event)"
+              class="mr-3"
+            />
+            {{ region.name }}
+          </label>
+        </td>
+        <td class="text-yellow-600 text-right px-4">
+          {{ region.latest.confirmed }}
+        </td>
+        <td class="text-green-600 text-right px-4">
+          {{ region.latest.recovered }}
+        </td>
+        <td class="text-gray-500 text-right px-4">
+          {{ region.latest.recovered }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script>
-import { sortBy } from 'lodash-es';
+import { pull, sortBy } from 'lodash-es';
 import SidebarLayout from '../Layout/SidebarLayout';
+import Icon from '../Components/Icons/Icon';
 
 export default {
   layout: SidebarLayout,
-  name: 'RegionSelect',
-  data: () => ({
-    query: '',
-    showAll: false
-  }),
-  computed: {
-    regions() {
-      const regions = [
-        ...this.$page.countries,
-        ...this.$page.provinces
-      ].filter(({ name }) =>
-        this.query.length
-          ? name.toLowerCase().includes(this.query.toLowerCase())
-          : true
-      );
+  name: 'Regions',
+  components: { Icon },
+  props: {
+    regions: {
+      required: true,
+      type: Array
+    }
+  },
+  data() {
+    return {
+      query: '',
+      hideUnselected: false,
+      selected: this.$page.selectedRegions
+    };
+  },
+  watch: {
+    selected(selected) {
+      let { origin, pathname } = window.location;
+      let regions = btoa(JSON.stringify(selected));
 
-      return sortBy(regions, 'name');
-    },
-    selected() {
-      return this.$page.selectedRegions;
+      this.$inertia.visit(origin + pathname + '?regions=' + regions, {
+        preserveState: true,
+        preserveScroll: true
+      });
+    }
+  },
+  computed: {
+    filtered() {
+      return this.regions.filter(({ name, id, type }) => {
+        const includesQuery = name
+          .toLowerCase()
+          .includes(this.query.toLowerCase());
+
+        if (this.hideUnselected) {
+          return this.isSelected({ id, type }) && includesQuery;
+        }
+
+        return includesQuery;
+      });
     }
   },
   methods: {
-    updateSelected(region, { target }) {
-      let updated = this.selected;
-
+    updateSelected({ type, id }, { target }) {
       if (target.checked) {
-        updated.push(region);
-      } else {
-        updated = updated.filter(
-          selected => JSON.stringify(region) !== JSON.stringify(selected)
-        );
+        return this.selected.push({ type, id });
       }
 
-      let { origin, pathname } = window.location;
-      const url = `${origin}${pathname}?regions=${btoa(
-        JSON.stringify(updated)
-      )}`;
-
-      this.$inertia.visit(url);
+      this.selected = this.selected.filter(
+        selected => JSON.stringify(selected) !== JSON.stringify({ type, id })
+      );
     },
     isSelected(region) {
-      return this.$page.selectedRegions.find(
+      return this.selected.find(
         ({ type, id }) => region.type === type && region.id === id
       );
     }

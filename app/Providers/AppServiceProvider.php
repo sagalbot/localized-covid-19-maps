@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Country;
 use App\Http\Requests\SelectedRegionsRequest;
+use App\Http\Resources\SelectedRegionResource;
 use App\Province;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -36,16 +37,6 @@ class AppServiceProvider extends ServiceProvider
             return md5_file(public_path('mix-manifest.json'));
         });
 
-        Inertia::share('countries', function () {
-            $countries = Country::with('latestReport')->get();
-            return RegionResource::collection($countries);
-        });
-
-        Inertia::share('provinces', function () {
-            $provinces = Province::with('latestReport')->get();
-            return RegionResource::collection($provinces);
-        });
-
         Inertia::share('selectedRegions', function () {
             $selected = collect(request()->query('regions', []))
                 ->groupBy('type')
@@ -54,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
                 })
                 ->flatten();
 
-            return RegionResource::collection($selected);
+            return SelectedRegionResource::collection($selected);
         });
     }
 }

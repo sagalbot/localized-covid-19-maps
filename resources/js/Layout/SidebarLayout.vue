@@ -12,7 +12,7 @@
       <div class="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3">
         <HamburgerButton @click="sidebarOpen = true" />
       </div>
-      <main class="flex-1 relative z-0 overflow-y-auto pb-6">
+      <main class="flex-1 relative z-0 overflow-y-auto">
         <slot></slot>
       </main>
     </div>
