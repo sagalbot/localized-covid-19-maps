@@ -58,9 +58,3 @@ export default {
   }
 };
 </script>
-<style scoped>
-.chart-container {
-  min-height: 65%;
-  max-height: 75vh;
-}
-</style>

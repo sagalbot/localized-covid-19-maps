@@ -23,20 +23,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.loading-spinner {
-  border-bottom-color: transparent;
-}
-@keyframes infinite-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-.infinite-spin {
-  animation: infinite-spin 1.1s infinite linear;
-}
-</style>

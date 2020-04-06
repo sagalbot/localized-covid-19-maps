@@ -9,9 +9,11 @@
       </h4>
       <inertia-link
         :key="regions.route.toString()"
-        :class="{ active: routeActive(regions.route.name) }"
         :href="regions.route.toString() + queryString"
-        class="inline-flex justify-between"
+        :class="{
+          'bg-blue-100 hover:text-blue-700': routeActive(regions.route.name)
+        }"
+        class="flex w-full inline-flex justify-between items-center px-4 py-2 mb-2 text-base text-gray-700 leading-6 rounded-md transition ease-in-out duration-150 hover:bg-blue-100 hover:text-blue-700"
       >
         <span v-if="!collapsed">{{ regions.route.name }}</span>
         <Icon :name="regions.icon" :size="4" />
@@ -26,9 +28,9 @@
       <inertia-link
         v-for="{ route, icon } in reports"
         :key="route.toString()"
-        :class="{ active: routeActive(route.name) }"
         :href="route.toString() + queryString"
-        class="inline-flex justify-between"
+        :class="{ 'bg-blue-100 text-blue-700': routeActive(route.name) }"
+        class="flex w-full inline-flex justify-between items-center px-4 py-2 mb-2 text-base text-gray-700 leading-6 rounded-md transition ease-in-out duration-150 hover:bg-blue-100 hover:text-blue-700"
       >
         <span v-if="!collapsed">{{ route.name }}</span>
         <Icon :name="icon" :size="4" />
@@ -67,16 +69,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-a {
-  @apply flex w-full items-center px-4 py-2 mb-2 text-base text-gray-700 leading-6 rounded-md transition ease-in-out duration-150;
-}
-.active,
-a:hover {
-  @apply text-blue-700 bg-blue-100;
-}
-.active:focus {
-  @apply outline-none;
-}
-</style>

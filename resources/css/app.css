@@ -4,4 +4,22 @@
 
 @tailwind utilities;
 
-@import '~vue-select/dist/vue-select.css';
+.loading-spinner {
+  border-bottom-color: transparent;
+}
+@keyframes infinite-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.infinite-spin {
+  animation: infinite-spin 1.1s infinite linear;
+}
+
+.chart-container {
+    min-height: 65%;
+    max-height: 75vh;
+}
