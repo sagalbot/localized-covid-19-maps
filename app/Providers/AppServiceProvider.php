@@ -39,7 +39,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Inertia::share('lastUpdate', function () {
-            return LastUpdate::where('status', 'ok')->first()->created_at;
+            return LastUpdate::where('status', 'ok')
+                ->latest()
+                ->first()->created_at;
         });
 
         Inertia::share('selectedRegions', function () {
