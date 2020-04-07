@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\JohnsHopkinsRepository;
+use App\LastUpdate;
 use App\Report;
 use App\Country;
 use App\Province;
@@ -99,9 +101,18 @@ class ScrapeAndSeed extends Command
             Cache::flush();
 
             DB::commit();
+
+            LastUpdate::create([
+                'status' => 'ok',
+            ]);
         } catch (\Exception $e) {
             dump($e->getMessage());
             DB::rollBack();
+
+            LastUpdate::create([
+                'status' => 'fail',
+                'exception' => $e->getMessage(),
+            ]);
         }
     }
 

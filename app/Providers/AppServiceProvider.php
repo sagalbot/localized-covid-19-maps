@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Country;
 use App\Http\Requests\SelectedRegionsRequest;
 use App\Http\Resources\SelectedRegionResource;
+use App\LastUpdate;
 use App\Province;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -35,6 +36,10 @@ class AppServiceProvider extends ServiceProvider
 
         Inertia::version(function () {
             return md5_file(public_path('mix-manifest.json'));
+        });
+
+        Inertia::share('lastUpdate', function () {
+            return LastUpdate::where('status', 'ok')->first()->created_at;
         });
 
         Inertia::share('selectedRegions', function () {
