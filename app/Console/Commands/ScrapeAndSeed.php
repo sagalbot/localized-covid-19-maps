@@ -2,19 +2,16 @@
 
 namespace App\Console\Commands;
 
-use App\JohnsHopkinsRepository;
-use App\LastUpdate;
 use App\Report;
 use App\Country;
 use App\Province;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
-use League\Csv\AbstractCsv;
-use League\Csv\Reader;
-use Illuminate\Support\Str;
+use App\LastUpdate;
+use App\JohnsHopkinsRepository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 class ScrapeAndSeed extends Command
 {
@@ -30,50 +27,14 @@ class ScrapeAndSeed extends Command
      *
      * @var string
      */
-    protected $description = 'Scrape and seed the database.';
-
-    /**
-     * Local storage/app/{DIRECTORY} path
-     */
-    const DIRECTORY = 'covid-data';
-
-    /**
-     * The path to daily reports within the repository.
-     */
-    const TIME_SERIES = 'csse_covid_19_data/csse_covid_19_time_series';
-
-    const REPORTS_PATH = 'csse_covid_19_data/csse_covid_19_daily_reports';
-
-    const CONFIRMED = 'time_series_covid19_confirmed_global.csv';
-    const DEATHS = 'time_series_covid19_deaths_global.csv';
-    const RECOVERED = 'time_series_covid19_recovered_global.csv';
-
-    const US_CONFIRMED = 'time_series_covid19_confirmed_US.csv';
-    const US_DEATHS = 'time_series_covid19_deaths_US.csv';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    protected $description = 'Pull the latest data and dispatch an import job';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        if ($this->option('fresh') || !Storage::exists(self::DIRECTORY)) {
-            $this->info('Cloning fresh repository...');
-            Storage::deleteDirectory(self::DIRECTORY);
-            shell_exec("git clone https://github.com/CSSEGISandData/COVID-19.git {$this->repositoryPath()}");
-        } else {
-            $this->info('Pulling repository...');
-            $this->line(shell_exec("cd {$this->repositoryPath()} && git pull"));
-        }
+        $this->cloneOrPullRepository();
 
         try {
             DB::beginTransaction();
@@ -82,15 +43,13 @@ class ScrapeAndSeed extends Command
 
             Cache::flush();
 
-            collect([self::CONFIRMED, self::DEATHS, self::RECOVERED])->each(function ($file) {
-                $this->line("Importing {$file} \n");
-                $records = collect($this->getSeries($file)->getRecords());
+            JohnsHopkinsRepository::series()->each(function ($file, $metric) {
+                $records = JohnsHopkinsRepository::getRecords($file);
 
-                $bar = $this->output->createProgressBar($records->count());
-                $bar->start();
+                $bar = $this->createAndStartProgress($records->count(), $metric);
 
-                $records->each(function ($row) use ($bar, $file) {
-                    $this->findOrCreateModels($row, $file);
+                $records->each(function ($row) use ($bar, $metric) {
+                    $this->findOrCreateModels($row, $metric);
                     $bar->advance();
                 });
 
@@ -116,16 +75,35 @@ class ScrapeAndSeed extends Command
         }
     }
 
+    protected function createAndStartProgress(int $count, string $metric): ProgressBar
+    {
+        $this->line("Importing {$metric}...");
+        $bar = $this->output->createProgressBar($count);
+        $bar->start();
+
+        return $bar;
+    }
+
+    protected function cloneOrPullRepository(): void
+    {
+        $path = JohnsHopkinsRepository::path();
+
+        if ($this->option('fresh') || JohnsHopkinsRepository::doesNotExist()) {
+            $this->info('Cloning fresh repository...');
+            JohnsHopkinsRepository::delete();
+            shell_exec("git clone https://github.com/CSSEGISandData/COVID-19.git {$path}");
+        } else {
+            $this->info('Pulling repository...');
+            $this->line(shell_exec("cd {$path} && git pull"));
+        }
+    }
+
     /**
      * @param array $row
-     * @param string $file
+     * @param string $metric
      */
-    public function findOrCreateModels(array $row, string $file): void
+    public function findOrCreateModels(array $row, string $metric): void
     {
-        $metric = collect(['deaths', 'confirmed', 'recovered'])->first(function ($type) use ($file) {
-            return Str::contains($file, $type);
-        });
-
         $country = $this->determineCountryId($row);
         $province = $this->determineProvinceId($row, $country);
 
@@ -182,46 +160,6 @@ class ScrapeAndSeed extends Command
                 return array_key_exists($convention, $report);
             })
             ->first();
-    }
-
-    /**
-     * @return \Illuminate\Support\Collection
-     */
-    public function dailyReports()
-    {
-        return collect(Storage::files($this->dailyReportsPath()))->filter(function ($path) {
-            return Str::contains($path, '.csv');
-        });
-    }
-
-    /**
-     * Path to the locally cloned repository.
-     *
-     * @return string
-     */
-    public function repositoryPath()
-    {
-        return storage_path('app/' . self::DIRECTORY);
-    }
-
-    public function dailyReportsPath()
-    {
-        return self::DIRECTORY . '/' . self::REPORTS_PATH;
-    }
-
-    /**
-     * @param $name
-     * @return \League\Csv\AbstractCsv
-     * @throws \League\Csv\Exception
-     */
-    public function getSeries($name): AbstractCsv
-    {
-        $file = Storage::get(self::DIRECTORY . '/' . self::TIME_SERIES . '/' . $name);
-
-        $csv = Reader::createFromString($file);
-        $csv->setHeaderOffset(0);
-
-        return $csv;
     }
 
     protected function resetDatabase(): void
