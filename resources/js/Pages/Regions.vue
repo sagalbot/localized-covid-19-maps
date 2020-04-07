@@ -68,13 +68,13 @@
           </label>
         </td>
         <td class="text-yellow-600 text-right px-4">
-          {{ region.latest.confirmed }}
+          {{ format(region.latest.confirmed) }}
         </td>
         <td class="text-green-600 text-right px-4">
-          {{ region.latest.recovered }}
+          {{ format(region.latest.recovered) }}
         </td>
         <td class="text-gray-500 text-right px-4">
-          {{ region.latest.recovered }}
+          {{ format(region.latest.recovered) }}
         </td>
       </tr>
     </tbody>
@@ -82,9 +82,9 @@
 </template>
 
 <script>
-import { pull, sortBy } from 'lodash-es';
 import SidebarLayout from '../Layout/SidebarLayout';
 import Icon from '../Components/Icons/Icon';
+import format from 'sugar/number/format';
 
 export default {
   layout: SidebarLayout,
@@ -131,6 +131,7 @@ export default {
     }
   },
   methods: {
+    format,
     updateSelected({ type, id }, { target }) {
       if (target.checked) {
         return this.selected.push({ type, id });
