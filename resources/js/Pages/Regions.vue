@@ -29,17 +29,26 @@
         </th>
       </tr>
       <tr>
-        <th class="border-b border-gray-300 text-gray-500 text-left px-4 py-2">
-          Region
-        </th>
-        <th class="border-b border-gray-300 text-gray-500 text-right px-4 py-2">
-          Confirmed
-        </th>
-        <th class="border-b border-gray-300 text-gray-500 text-right px-4 py-2">
-          Recovered
-        </th>
-        <th class="border-b border-gray-300 text-gray-500 text-right px-4 py-2">
-          Deaths
+        <th
+          v-for="{ label, key } in headers"
+          class="border-b border-gray-300 text-gray-500 px-4 py-2"
+          :class="{
+            'text-right': key !== 'name',
+            'text-left': key === 'name'
+          }"
+        >
+          <button class="inline-flex items-center" @click="updateSort(key)">
+            {{ label }}
+            <Icon
+              name="cheveron-down"
+              :size="5"
+              class="transform transition-transform duration-200 hover:opacity-100"
+              :class="{
+                'opacity-25': key !== sort,
+                'rotate-180': orderAsc
+              }"
+            />
+          </button>
         </th>
       </tr>
     </thead>
@@ -85,6 +94,7 @@
 import SidebarLayout from '../Layout/SidebarLayout';
 import Icon from '../Components/Icons/Icon';
 import format from 'sugar/number/format';
+import { sortBy } from 'lodash-es';
 
 export default {
   layout: SidebarLayout,
@@ -99,6 +109,8 @@ export default {
   data() {
     return {
       query: '',
+      sort: 'name',
+      orderAsc: true,
       hideUnselected: false,
       selected: this.$page.selectedRegions
     };
@@ -116,22 +128,45 @@ export default {
   },
   computed: {
     filtered() {
-      return this.regions.filter(({ name, country_name, id, type }) => {
-        const query = this.query.toLowerCase();
-        const includesQuery =
-          name.toLowerCase().includes(query) ||
-          country_name.toLowerCase().includes(query);
+      const regions = this.regions.filter(
+        ({ name, country_name, id, type }) => {
+          const query = this.query.toLowerCase();
+          const includesQuery =
+            name.toLowerCase().includes(query) ||
+            country_name.toLowerCase().includes(query);
 
-        if (this.hideUnselected) {
-          return this.isSelected({ id, type }) && includesQuery;
+          if (this.hideUnselected) {
+            return this.isSelected({ id, type }) && includesQuery;
+          }
+
+          return includesQuery;
         }
+      );
 
-        return includesQuery;
-      });
+      const sorted = sortBy(regions, this.sort);
+
+      if (!this.orderAsc) {
+        sorted.reverse();
+      }
+      return sorted;
+    },
+    headers() {
+      return [
+        { label: 'Region', key: 'name' },
+        { label: 'Confirmed', key: 'latest.confirmed' },
+        { label: 'Recovered', key: 'latest.recovered' },
+        { label: 'Deaths', key: 'latest.deaths' }
+      ];
     }
   },
   methods: {
     format,
+    updateSort(key) {
+      if (this.sort === key) {
+        return (this.orderAsc = !this.orderAsc);
+      }
+      this.sort = key;
+    },
     updateSelected({ type, id }, { target }) {
       if (target.checked) {
         return this.selected.push({ type, id });
