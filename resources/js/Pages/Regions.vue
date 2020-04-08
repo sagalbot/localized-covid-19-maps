@@ -74,7 +74,7 @@
           {{ format(region.latest.recovered) }}
         </td>
         <td class="text-gray-500 text-right px-4">
-          {{ format(region.latest.recovered) }}
+          {{ format(region.latest.deaths) }}
         </td>
       </tr>
     </tbody>
