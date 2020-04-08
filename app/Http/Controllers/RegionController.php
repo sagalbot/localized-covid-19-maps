@@ -7,6 +7,7 @@ use App\Province;
 use App\Report;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Resources\RegionResource;
 
 class RegionController extends Controller
@@ -29,9 +30,15 @@ class RegionController extends Controller
                         ->where('country_id', $country->id)
                         ->reduce(function (Report $report, Province $province) {
                             $report->country_id = $province->country_id;
-                            $report->confirmed += $province->latestReport->confirmed;
-                            $report->recovered += $province->latestReport->recovered;
-                            $report->deaths += $province->latestReport->deaths;
+                            if ($province->latestReport) {
+                                $report->confirmed += $province->latestReport->confirmed;
+                                $report->recovered += $province->latestReport->recovered;
+                                $report->deaths += $province->latestReport->deaths;
+                            } else {
+                                Log::critical(
+                                    "Province ID {$province->id} has no latest report. The name may have changed.",
+                                );
+                            }
                             return $report;
                         }, new Report(['country_id' => $country->id]));
                 }
