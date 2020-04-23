@@ -122,6 +122,14 @@ class ScrapeAndSeed extends Command
                     Cache::put($reportCacheKey, $report);
                 }
 
+                /**
+                 * The -1's in the time series for these rows blows up the system.
+                 * 'Grand Princess', 'Diamond Princess'
+                 */
+                if ((int) $value === -1) {
+                    $value = 0;
+                }
+
                 $report->update([
                     $metric => $value,
                 ]);
