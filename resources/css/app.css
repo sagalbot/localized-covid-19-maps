@@ -20,8 +20,19 @@
 }
 
 .chart-container {
-  min-height: 65%;
-  max-height: 75vh;
+  height: 100%;
+}
+
+@media (min-height: 50rem) {
+  .chart-container {
+    height: 75vh;
+  }
+}
+
+@media (min-height: 75rem) {
+  .chart-container {
+    height: 50vh;
+  }
 }
 
 a:focus {
