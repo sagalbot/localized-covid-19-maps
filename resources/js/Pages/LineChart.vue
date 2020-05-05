@@ -1,12 +1,16 @@
 <template>
-  <div class="w-full flex flex-col pt-3 pr-5 chart-container">
-    <div ref="chartContainer" class="w-full flex-1">
+  <div
+    ref="chartContainer"
+    class="w-full flex flex-col pt-3 pr-5 chart-container"
+  >
+    <div class="w-full flex-1">
       <VueApexCharts
         type="line"
         height="100%"
-        :width="width"
+        width="100%"
         :series="series"
-        :options="options"
+        :options="chartConfig"
+        :key="componentKey"
       />
     </div>
   </div>
@@ -20,7 +24,8 @@ export default {
   components: { VueApexCharts },
   props: {
     options: {
-      default: () => chartConfig()
+      type: Object,
+      default: () => {}
     },
     series: {
       required: true,
@@ -28,10 +33,14 @@ export default {
     }
   },
   data: () => ({
-    width: 0,
-    height: 0,
-    resizeObserver: {}
+    resizeObserver: {},
+    componentKey: 0
   }),
+  computed: {
+    chartConfig() {
+      return chartConfig(this.options);
+    }
+  },
   mounted() {
     this.onResize();
     this.resizeObserver = new ResizeObserver(this.onResize);
@@ -45,12 +54,7 @@ export default {
   methods: {
     onResize() {
       window.requestAnimationFrame(() => {
-        const {
-          height,
-          width
-        } = this.$refs.chartContainer.getBoundingClientRect();
-        this.width = width;
-        this.height = height;
+        this.componentKey += 1;
       });
     }
   }
