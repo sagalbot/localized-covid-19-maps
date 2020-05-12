@@ -109,8 +109,8 @@ export default {
   data() {
     return {
       query: '',
-      sort: 'name',
-      orderAsc: true,
+      sort: 'latest.confirmed',
+      orderAsc: false,
       hideUnselected: false,
       selected: this.$page.selectedRegions
     };
